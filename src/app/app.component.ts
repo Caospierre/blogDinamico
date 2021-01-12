@@ -1,5 +1,5 @@
 import { Entrada } from '../models/entrada';
-import { Component,ElementRef ,OnInit  } from '@angular/core';
+import { Component,ElementRef ,OnInit,HostListener  } from '@angular/core';
 import { Location } from '@angular/common';
 import { Apollo } from "apollo-angular";
 import gql from "graphql-tag";
@@ -11,6 +11,7 @@ import { throwServerError } from '@apollo/client/core';
 })
 export class AppComponent implements OnInit {
   status=false;
+  verticalOffset=0;
   entradas : Entrada []=[];
 
   entradasx :Entrada[]=[
@@ -20,6 +21,7 @@ export class AppComponent implements OnInit {
     {id:3,link:"3",title:"3",description:"0",status:false},
                       ]; 
   activeLink:String ='';
+  temporlalink:String='';
   title = 'blogTest';
   loading = true;
   error: any;
@@ -68,22 +70,33 @@ export class AppComponent implements OnInit {
   public onIntersection({ target, visible }: { target: Element; visible: boolean }): void {
       console.log(target.scrollTo);
  //   console.log(target.id);
-      if(visible && this.status==true){
+
+      if(visible &&this.status==false ){
 
           console.log("Entro"); 
           console.log(target.id);
           this.onSwitch(target.id);
+          
        }
-        //aca ves si el elemento aparecio en tu pantalla o se fue de tu pantalla
   }
+  @HostListener('window:scroll', ['$event'])
+  onWindowScroll() {
+    // do some stuff here when the window is scrolled
+     this.verticalOffset = window.pageYOffset 
+          || document.documentElement.scrollTop 
+          || document.body.scrollTop || 0;
+      console.log("move"+this.verticalOffset);
+
+      
+  } 
+
   onScrollTo(link:string) {
 
     try{
-    this.myElement.nativeElement.ownerDocument.getElementById(link).scrollIntoView({behavior: 'smooth'}); 
-
-     
+    this.myElement.nativeElement.ownerDocument.getElementById(link).scrollIntoView(); 
+      this.status=true;
+    this.onSwitch(link); 
         
-      this.onSwitch(link);  
      } catch (error) {
       console.error(error);
 
@@ -93,8 +106,8 @@ export class AppComponent implements OnInit {
   } 
   onSwitch(link:string){
     this.location.replaceState('/'+link);
-    this.activeLink=link;
-
+    this.temporlalink=link;
+    this.activeLink=this.temporlalink;
   }
  
 
